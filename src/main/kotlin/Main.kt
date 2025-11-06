@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 
 const val URL = "jdbc:sqlite:src/main/resources/StockMimahair.sqlite"
 fun main() {
-
+// ESTOY EN UN SOLO REPO
     var isRunning = true
 
     while (isRunning) {
