@@ -5,9 +5,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 
-const val URL = "jdbc:sqlite:src/main/resources/StockMimahair.sqlite"
+const val URL = "jdbc:mysql://100.26.171.98:3306/mimahairstock"
+const val USER = "dat"
+const val PASSWD = "holaHOLA01+"
+
 fun main() {
-// ESTOY EN UN SOLO REPO
     var isRunning = true
 
     while (isRunning) {
@@ -234,7 +236,7 @@ object ProductosDAO {
     fun listarProductos(): List<ProductoBD> {
         val lista = mutableListOf<ProductoBD>()
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.createStatement().use { stmt ->
                 val rs = stmt.executeQuery("SELECT * FROM productos")
                 while (rs.next()) {
@@ -262,7 +264,7 @@ object ProductosDAO {
 
     fun consultarProductoPorId(id: Int): ProductoBD? {
         var producto: ProductoBD? = null
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement("SELECT * FROM productos WHERE id = ?").use { pstmt ->
                 pstmt.setInt(1, id)
                 val rs = pstmt.executeQuery()
@@ -353,7 +355,7 @@ object ProductosDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "INSERT INTO productos(nombre_prod, marca_prod, categoria_prod, precio_prod, stock) VALUES (?, ?, ?, ?, ?)"
             ).use { pstmt ->
@@ -396,7 +398,7 @@ object ProductosDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE productos SET nombre_prod = ? WHERE id = ?"
             ).use { pstmt ->
@@ -440,7 +442,7 @@ object ProductosDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE productos SET marca_prod = ? WHERE id = ?"
             ).use { pstmt ->
@@ -484,7 +486,7 @@ object ProductosDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE productos SET categoria_prod = ? WHERE id = ?"
             ).use { pstmt ->
@@ -528,7 +530,7 @@ object ProductosDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE productos SET precio_prod = ? WHERE id = ?"
             ).use { pstmt ->
@@ -572,7 +574,7 @@ object ProductosDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE productos SET stock = ? WHERE id = ?"
             ).use { pstmt ->
@@ -605,7 +607,7 @@ object ProductosDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement("DELETE FROM productos WHERE id = ?").use { pstmt ->
                 pstmt.setInt(1, idProd)
                 val filas = pstmt.executeUpdate()
@@ -666,7 +668,7 @@ object ProductosDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             try {
                 conn.autoCommit = false
 
@@ -729,7 +731,7 @@ object FacturaDAO {
                 println("ID inválido o formato incorrecto!")
             } else {
                 idFactura = tempIdFact
-                conectarBd(URL)?.use { conn ->
+                conectarBd()?.use { conn ->
                     conn.prepareStatement("SELECT f.id_factura AS factura, f.fecha_factura AS fecha, c.nombre_cliente AS nombre, c.apellidos_cliente AS apellidos, l.id_linea AS linea, p.nombre_prod AS producto, l.cantidad, ROUND(p.precio_prod * l.cantidad, 2) AS total_linea FROM factura f JOIN clientes c ON f.id_cliente = c.id JOIN linea_factura l ON f.id_factura = l.id_factura JOIN productos p ON l.id_producto = p.id WHERE f.id_factura = ? ORDER BY f.id_factura, l.id_linea")
                         .use { pstmt ->
                             pstmt.setInt(1, idFactura)
@@ -750,7 +752,7 @@ object FacturaDAO {
     }
 
     fun mostrarFacturasCompletas() {
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.createStatement().use { stmt ->
                 val rs = stmt.executeQuery("SELECT f.id_factura AS factura, f.fecha_factura AS fecha, c.nombre_cliente AS nombre, c.apellidos_cliente AS apellidos, l.id_linea AS linea, p.nombre_prod AS producto, l.cantidad, ROUND(p.precio_prod * l.cantidad, 2) AS total_linea FROM factura f JOIN clientes c ON f.id_cliente = c.id JOIN linea_factura l ON f.id_factura = l.id_factura JOIN productos p ON l.id_producto = p.id ORDER BY f.id_factura, l.id_linea")
                 println("\nFACTURAS COMPLETAS:\n")
@@ -785,7 +787,7 @@ object FacturaDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement("UPDATE factura SET fecha_factura = ? WHERE id_factura = ?").use { pstmt ->
                 pstmt.setString(1, nuevaFechaFactura)
                 pstmt.setInt(2, idFactura)
@@ -815,7 +817,7 @@ object FacturaDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             try {
                 conn.autoCommit = false
 
@@ -851,7 +853,7 @@ object FacturaDAO {
 
 object ClienteDAO {
     fun mostrarNombresClientes() {
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.createStatement().use { stmt ->
                 val rs = stmt.executeQuery("SELECT id, nombre_cliente, apellidos_cliente FROM clientes")
                 while (rs.next()) {
@@ -862,7 +864,7 @@ object ClienteDAO {
     }
 
     fun mostrarTodosClientes() {
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.createStatement().use { stmt ->
                 val rs = stmt.executeQuery("SELECT * FROM clientes")
                 while (rs.next()) {
@@ -882,7 +884,7 @@ object ClienteDAO {
                 println("ID inválido o formato incorrecto!")
             } else {
                 idCliente = tempIdCliente
-                conectarBd(URL)?.use { conn ->
+                conectarBd()?.use { conn ->
                     conn.prepareStatement("SELECT * FROM clientes WHERE id = ?")
                         .use { pstmt ->
                             pstmt.setInt(1, idCliente)
@@ -931,7 +933,7 @@ object ClienteDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "INSERT INTO clientes(nombre_cliente, apellidos_cliente, tlf_cliente) VALUES (?, ?, ?)"
             ).use { pstmt ->
@@ -961,7 +963,7 @@ object ClienteDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement("DELETE FROM clientes WHERE id = ?").use { pstmt ->
                 pstmt.setInt(1, idCliente)
                 val filas = pstmt.executeUpdate()
@@ -1002,7 +1004,7 @@ object ClienteDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE clientes SET nombre_cliente = ? WHERE id = ?"
             ).use { pstmt ->
@@ -1046,7 +1048,7 @@ object ClienteDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE clientes SET apellidos_cliente = ? WHERE id = ?"
             ).use { pstmt ->
@@ -1090,7 +1092,7 @@ object ClienteDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE clientes SET tlf_cliente = ? WHERE id = ?"
             ).use { pstmt ->
@@ -1109,7 +1111,7 @@ object ClienteDAO {
 
 object ProveedorDAO {
     fun mostrarNombreProveedores() {
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.createStatement().use { stmt ->
                 val rs = stmt.executeQuery("SELECT id, nom_proveedor, apellidos_proveedor FROM proveedores")
                 while (rs.next()) {
@@ -1120,7 +1122,7 @@ object ProveedorDAO {
     }
 
     fun mostrarTodosProveedores() {
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.createStatement().use { stmt ->
                 val rs = stmt.executeQuery("SELECT * FROM proveedores")
                 while (rs.next()) {
@@ -1140,7 +1142,7 @@ object ProveedorDAO {
                 println("ID inválido o formato incorrecto!")
             } else {
                 idProveedor = tempIdProveedor
-                conectarBd(URL)?.use { conn ->
+                conectarBd()?.use { conn ->
                     conn.prepareStatement("SELECT * FROM proveedores WHERE id = ?")
                         .use { pstmt ->
                             pstmt.setInt(1, idProveedor)
@@ -1200,7 +1202,7 @@ object ProveedorDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "INSERT INTO proveedores(nom_proveedor, apellidos_proveedor, localidad_proveedor, tlf_cliente) VALUES (?, ?, ?, ?)"
             ).use { pstmt ->
@@ -1231,7 +1233,7 @@ object ProveedorDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement("DELETE FROM proveedores WHERE id = ?").use { pstmt ->
                 pstmt.setInt(1, idProveedor)
                 val filas = pstmt.executeUpdate()
@@ -1272,7 +1274,7 @@ object ProveedorDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE proveedores SET nom_proveedor = ? WHERE id = ?"
             ).use { pstmt ->
@@ -1316,7 +1318,7 @@ object ProveedorDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE proveedores SET apellidos_proveedor = ? WHERE id = ?"
             ).use { pstmt ->
@@ -1360,7 +1362,7 @@ object ProveedorDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE proveedores SET localidad_proveedor = ? WHERE id = ?"
             ).use { pstmt ->
@@ -1404,7 +1406,7 @@ object ProveedorDAO {
             }
         }
 
-        conectarBd(URL)?.use { conn ->
+        conectarBd()?.use { conn ->
             conn.prepareStatement(
                 "UPDATE proveedores SET tlf_proveedor = ? WHERE id = ?"
             ).use { pstmt ->
@@ -1422,9 +1424,9 @@ object ProveedorDAO {
 }
 
 
-fun conectarBd(url: String): Connection? {
+fun conectarBd(): Connection? {
     return try {
-        DriverManager.getConnection(url)
+        DriverManager.getConnection( URL, USER, PASSWD)
     } catch (e: SQLException) {
         e.printStackTrace()
         null
