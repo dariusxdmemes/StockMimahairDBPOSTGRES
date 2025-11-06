@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 
 
 const val URL = "jdbc:sqlite:src/main/resources/StockMimahair.sqlite"
-
+// HOLA GOLA HOKASFADJBAJHDSAJSDBAKJBDS
 fun main() {
 
     var isRunning = true
