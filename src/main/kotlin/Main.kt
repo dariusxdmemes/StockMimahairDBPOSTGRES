@@ -48,19 +48,23 @@ object MenusDAO {
             println("4. Comprar producto (TRANSACCIÓN)")
             println("5. Añadir un producto")
             println("6. Eliminar un producto")
-            println("7. Salir\n")
+            println("7. Mostrar valor total de productos de una marca (FUNCIÓN)")
+            println("8. Mostrar valor del stock actual (FUNCIÓN)")
+            println("9. Salir\n")
             print("Selecciona una opcion: ")
             val opcion = readln().toIntOrNull()
             when (opcion) {
                 null -> println("\nLa opcion tiene que ser un número!\n")
-                !in 1..7 -> println("Selecciona una opción entre las disponibles!\n")
+                !in 1..9 -> println("Selecciona una opción entre las disponibles!\n")
                 1 -> ProductosDAO.mostrarProductos()
                 2 -> ProductosDAO.mostrarProductoPorId()
                 3 -> menuModificarProducto()
                 4 -> ProductosDAO.comprarProductoTransaccion()
                 5 -> ProductosDAO.anadirProducto()
                 6 -> ProductosDAO.eliminarProducto()
-                7 -> {
+                7 -> ProductosDAO.mostrarValorTotalMarca()
+                8 -> println()
+                9 -> {
                 println("\nVolviendo atrás...\n")
                 isRunning = false
                 }
@@ -71,7 +75,7 @@ object MenusDAO {
         var isRunning = true
 
         while (isRunning) {
-            println("\nMODIFICAR PRODUCTO\n")
+            println("\nMODIFICAR PRODUCTO (FUNCIONES)\n")
             println("1. Modificar nombre")
             println("2. Modificar marca")
             println("3. Modificar categoria")
@@ -131,7 +135,7 @@ object MenusDAO {
             println("1. Mostrar todos los clientes")
             println("2. Mostrar un cliente en específico")
             println("3. Modificar un cliente existente")
-            println("4. Añadir un cliente")
+            println("4. Añadir un cliente (FUNCIÓN)")
             println("5. Eliminar un cliente")
             println("6. Salir\n")
             print("Selecciona una opcion: ")
@@ -183,7 +187,7 @@ object MenusDAO {
             println("\nPROVEEDORES\n")
             println("1. Mostrar todos los proveedores")
             println("2. Mostrar un proveedor en específico")
-            println("3. Modificar un proveedor existente")
+            println("3. Modificar un proveedor existente (FUNCIÓN AQUÍ)")
             println("4. Añadir un proveedor")
             println("5. Eliminar un proveedor")
             println("6. Salir\n")
@@ -212,7 +216,7 @@ object MenusDAO {
             println("1. Modificar nombre")
             println("2. Modificar apellidos")
             println("3. Modificar localidad")
-            println("4. Modificar telefono")
+            println("4. Modificar telefono (FUNCIÓN)")
             println("5. Volver\n")
             print("Selecciona una opcion: ")
             val opcion = readln().toIntOrNull()
@@ -621,10 +625,6 @@ object ProductosDAO {
     }
 
     fun comprarProductoTransaccion() {
-        /* 1 Mostrar stock
-        *  2 Elegir producto
-        *  3 Restar Stock producto
-        *  4 Confirmar transacción */
         var idProducto: Int? = null
         var cantidad: Int? = null
         var idComprador: Int? = null
@@ -716,6 +716,35 @@ object ProductosDAO {
                 println("Fin de la transacción")
             }
         }
+    }
+
+
+    fun mostrarValorTotalMarca() {
+        mostrarProductos()
+        print("\nIntroduce la marca del producto para ver su valor total: ")
+        val marcaProd = readlnOrNull()
+        if (marcaProd == null) {
+            println("\nIntroduce una marca existente!\n")
+        }
+
+        conectarBd()?.use { conn ->
+            val sql = "SELECT valor_total_marca(?);"
+            conn.prepareStatement(sql).use { stmt ->
+                stmt.setString(1, marcaProd)
+                stmt.executeQuery().use { rs ->
+                    if (rs.next()) {
+                        val totalProductoMarca = rs.getInt(1)
+                        println("El valor total de productos de la marca: $marcaProd es de: $totalProductoMarca €")
+                    } else {
+                        println("No existe ningun producto de esa marca")
+                    }
+                }
+            }
+        }
+    }
+
+    fun mostrarValorStockTotal() {
+
     }
 
 }
