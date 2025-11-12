@@ -63,7 +63,7 @@ object MenusDAO {
                 5 -> ProductosDAO.anadirProducto()
                 6 -> ProductosDAO.eliminarProducto()
                 7 -> ProductosDAO.mostrarValorTotalMarca()
-                8 -> println()
+                8 -> ProductosDAO.mostrarValorStockTotal()
                 9 -> {
                 println("\nVolviendo atrás...\n")
                 isRunning = false
@@ -99,7 +99,6 @@ object MenusDAO {
             }
         }
     }
-
     fun menuFacturas() {
         var isRunning = true
 
@@ -126,7 +125,6 @@ object MenusDAO {
             }
         }
     }
-
     fun menuClientes() {
         var isRunning = true
 
@@ -135,7 +133,7 @@ object MenusDAO {
             println("1. Mostrar todos los clientes")
             println("2. Mostrar un cliente en específico")
             println("3. Modificar un cliente existente")
-            println("4. Añadir un cliente (FUNCIÓN)")
+            println("4. Añadir un cliente (PROCEDIMIENTO)")
             println("5. Eliminar un cliente")
             println("6. Salir\n")
             print("Selecciona una opcion: ")
@@ -187,7 +185,7 @@ object MenusDAO {
             println("\nPROVEEDORES\n")
             println("1. Mostrar todos los proveedores")
             println("2. Mostrar un proveedor en específico")
-            println("3. Modificar un proveedor existente (FUNCIÓN AQUÍ)")
+            println("3. Modificar un proveedor existente (PROCEDIMINETO AQUÍ)")
             println("4. Añadir un proveedor")
             println("5. Eliminar un proveedor")
             println("6. Salir\n")
@@ -216,7 +214,7 @@ object MenusDAO {
             println("1. Modificar nombre")
             println("2. Modificar apellidos")
             println("3. Modificar localidad")
-            println("4. Modificar telefono (FUNCIÓN)")
+            println("4. Modificar telefono (PROCEDIMIENTO)")
             println("5. Volver\n")
             print("Selecciona una opcion: ")
             val opcion = readln().toIntOrNull()
@@ -744,7 +742,16 @@ object ProductosDAO {
     }
 
     fun mostrarValorStockTotal() {
-
+        conectarBd()?.use { conn ->
+            val sql = "SELECT stock_total() AS total_stock;"
+            conn.createStatement().use { stmt ->
+                val rs = stmt.executeQuery(sql)
+                while (rs.next()) {
+                    val valorTotalStock = rs.getDouble("total_stock")
+                    println("El valor total del stock es: $valorTotalStock €")
+                }
+            }
+        }
     }
 
 }
@@ -930,7 +937,7 @@ object ClienteDAO {
     fun anadirCliente() {
         var nomCliente = ""
         var apellCliente = ""
-        var tlfCliente = ""
+        var tlfCliente: Int? = null
 
         while (nomCliente.isBlank()) {
             print("Introduce el nombre del nuevo cliente: ")
@@ -943,20 +950,20 @@ object ClienteDAO {
         }
 
         while (apellCliente.isBlank()) {
-            print("Introduce la marca del producto: ")
+            print("Introduce los apellidos del nuevo cliente: ")
             val tempApell = readln()
             if (tempApell.isBlank()) {
-                println("\nLa marca no puede estar vacía!\n")
+                println("\nLos apellidos no pueden estar vacíos!\n")
             } else {
                 apellCliente = tempApell
             }
         }
 
-        while (tlfCliente.isBlank()) {
-            print("Introduce la categoria del producto: ")
-            val tempTlf = readln()
-            if (tempTlf.isBlank()) {
-                println("\nLa categoría no puede estar vacía!\n")
+        while (tlfCliente == null) {
+            print("Introduce el telefono del nuevo cliente: ")
+            val tempTlf = readln().toIntOrNull()
+            if (tempTlf == null) {
+                println("\nEl telefono no puede estar vacía!\n")
             } else {
                 tlfCliente = tempTlf
             }
@@ -964,13 +971,13 @@ object ClienteDAO {
 
         conectarBd()?.use { conn ->
             conn.prepareStatement(
-                "INSERT INTO clientes(nombre_cliente, apellidos_cliente, tlf_cliente) VALUES (?, ?, ?)"
+                "CALL crear_cliente(?, ?, ?)"
             ).use { pstmt ->
                 pstmt.setString(1, nomCliente)
                 pstmt.setString(2, apellCliente)
-                pstmt.setString(3, tlfCliente)
+                pstmt.setInt(3, tlfCliente)
                 pstmt.executeUpdate()
-                println("\nNuevo cliente: '$nomCliente' insertado con éxito.\n")
+                println("\nNuevo cliente: '$apellCliente', '$nomCliente', con teléfono: $tlfCliente insertado con éxito.\n")
             }
         } ?: println("No se pudo establecer la conexión.")
     }
@@ -1413,7 +1420,7 @@ object ProveedorDAO {
         println()
 
         var idProveedor: Int? = null
-        var nuevoTlf = ""
+        var nuevoTlf: Int? = null
 
         while (idProveedor == null) {
             print("\nIntroduce el ID del proveedor para modificar su teléfono: ")
@@ -1425,10 +1432,10 @@ object ProveedorDAO {
             }
         }
 
-        while (nuevoTlf.isBlank()) {
+        while (nuevoTlf == null) {
             print("\nIntroduce el nuevo teléfono del proveedor: ")
-            val tempNombre = readln()
-            if (tempNombre.isBlank()) {
+            val tempNombre = readln().toIntOrNull()
+            if (tempNombre == null) {
                 println("\nEl teléfono no puede estar vacío!\n")
             } else {
                 nuevoTlf = tempNombre
@@ -1437,13 +1444,13 @@ object ProveedorDAO {
 
         conectarBd()?.use { conn ->
             conn.prepareStatement(
-                "UPDATE proveedores SET tlf_proveedor = ? WHERE id = ?"
+                "CALL modificar_tlf_proveedor(?, ?);"
             ).use { pstmt ->
-                pstmt.setString(1, nuevoTlf)
-                pstmt.setInt(2, idProveedor)
+                pstmt.setInt(1, idProveedor)
+                pstmt.setInt(2, nuevoTlf)
                 val filas = pstmt.executeUpdate()
                 if (filas > 0) {
-                    println("Teléfono del proveedor con id: $idProveedor actualizado con éxito.")
+                    println("Teléfono del proveedor con id: $idProveedor actualizado con éxito a: $nuevoTlf.")
                 } else {
                     println("Error: No se encontró ningun proveedor con el id: $idProveedor.")
                 }
